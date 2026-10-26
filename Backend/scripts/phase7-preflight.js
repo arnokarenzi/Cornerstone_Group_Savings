@@ -3,6 +3,7 @@
 require("dotenv").config();
 const db = require("../config/db");
 const { validateProductionConfig } = require("../security/securityControls");
+const { assertEmailProviderConfiguration } = require("../services/emailService");
 const { assertConstitutionSettingsMatch } = require("../services/constitutionSettingsValidation");
 
 const REQUIRED_TABLES = [
@@ -31,21 +32,7 @@ function parseJson(value, label) {
   } catch { /* report below */ }
   throw new Error(`${label} is not valid JSON.`);
 }
-async function verifySmtp() {
-  const nodemailer = require("nodemailer");
-  const port = Number(process.env.SMTP_PORT || 587);
-  const secure = String(process.env.SMTP_SECURE || "false").trim().toLowerCase() === "true";
-  const transport = nodemailer.createTransport({
-    host: String(process.env.SMTP_HOST || "").trim(), port, secure,
-    requireTLS: !secure && port === 587,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
-    connectionTimeout: 15000, greetingTimeout: 15000, socketTimeout: 20000,
-  });
-  try { await transport.verify(); }
-  catch (error) {
-    throw new Error(`SMTP verification failed (${String(error?.code || "SMTP_VERIFY_FAILED")}). Check host, port, TLS mode, credentials and sender configuration; no email was sent.`);
-  } finally { transport.close(); }
-}
+
 async function main() {
   if (String(process.env.NODE_ENV || "").toLowerCase() !== "production") {
     throw new Error("Run with NODE_ENV=production against the intended staging/production configuration.");
@@ -134,8 +121,8 @@ async function main() {
   } finally {
     connection.release();
   }
-  await verifySmtp();
-  console.log("PASS: SMTP connection and authentication verified without sending an email.");
+  assertEmailProviderConfiguration(process.env, { production: true });
+  console.log("PASS: Resend HTTPS transactional-email configuration validated; no message was sent. Run npm run email:test -- recipient@example.com to verify live delivery.");
   console.log("\nPhase 7 production preflight passed. Still perform a browser smoke test, frontend build/lint, backup restore, hosting/HTTPS checks, and final financial/legal sign-off.");
 }
 

@@ -3,6 +3,7 @@
 require("dotenv").config();
 const db = require("../config/db");
 const { validateProductionConfig } = require("../security/securityControls");
+const { assertEmailProviderConfiguration } = require("../services/emailService");
 
 const REQUIRED_TABLES = [
   "groups", "users", "cycles", "meetings", "transactions", "loans",
@@ -35,34 +36,7 @@ function safeSettings(raw) {
   }
 }
 
-async function verifySmtp() {
-  let nodemailer;
-  try {
-    nodemailer = require("nodemailer");
-  } catch {
-    throw new Error("Nodemailer is missing. Run npm install in Backend before preflight.");
-  }
-  const port = Number(process.env.SMTP_PORT || 587);
-  const secure = String(process.env.SMTP_SECURE || "false").trim().toLowerCase() === "true";
-  const transport = nodemailer.createTransport({
-    host: String(process.env.SMTP_HOST || "").trim(),
-    port,
-    secure,
-    requireTLS: !secure && port === 587,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-  });
-  try {
-    await transport.verify();
-  } catch (error) {
-    const code = String(error?.code || "SMTP_VERIFY_FAILED");
-    throw new Error(`SMTP connection/authentication check failed (${code}). Check SMTP_HOST, port, TLS mode, username, password, and sender configuration.`);
-  } finally {
-    transport.close();
-  }
-}
+
 
 async function main() {
   if (String(process.env.NODE_ENV || "").toLowerCase() !== "production") {
@@ -135,8 +109,8 @@ async function main() {
     connection.release();
   }
 
-  await verifySmtp();
-  console.log("PASS: SMTP connection and authentication verified (no email was sent).");
+  assertEmailProviderConfiguration(process.env, { production: true });
+  console.log("PASS: Resend HTTPS transactional-email configuration validated; no message was sent. Run npm run email:test -- recipient@example.com to verify live delivery.");
   console.log("\nPreflight passed. This does not replace a live browser test, frontend build, backup restore test, or legal/financial sign-off.");
 }
 

@@ -90,7 +90,7 @@ async function main() {
     console.error('\nStaging smoke test failed. Fix failed checks before inviting members.');
     process.exit(1);
   }
-  console.log('\nStaging smoke checks passed. This does not test member login, financial workflows, SMTP delivery, HTTPS cookie flags, private database networking, or backup restoration; complete the accompanying checklist.');
+  console.log('\nStaging smoke checks passed. This does not test member login, financial workflows, transactional-email API delivery, HTTPS cookie flags, private database networking, or backup restoration; complete the accompanying checklist.');
 }
 
 main().catch((error) => {

@@ -57,12 +57,18 @@ function validateProductionConfig(env = process.env) {
   if (cookieSecure !== "true") problems.push("SESSION_COOKIE_SECURE must be true in production.");
   const cookieSameSite = String(env.SESSION_COOKIE_SAME_SITE || "Lax").trim().toLowerCase();
   if (!["lax", "strict", "none"].includes(cookieSameSite)) problems.push("SESSION_COOKIE_SAME_SITE must be Lax, Strict, or None.");
-  if (!String(env.SMTP_HOST || "").trim()) problems.push("SMTP_HOST must be configured for email verification and password recovery in production.");
-  if (!String(env.SMTP_USER || "").trim()) problems.push("SMTP_USER must be configured for production email delivery.");
-  if (!String(env.SMTP_PASSWORD || "").trim()) problems.push("SMTP_PASSWORD must be configured for production email delivery.");
-  const smtpSecure = String(env.SMTP_SECURE ?? "false").trim().toLowerCase();
-  if (!["true", "false"].includes(smtpSecure)) problems.push("SMTP_SECURE must be true or false.");
-  if (!String(env.SMTP_FROM || "").trim() || /example\.com|\.example(?:\s|>|$)/i.test(String(env.SMTP_FROM || ""))) problems.push("SMTP_FROM must use a real sender address in production.");
+  const emailProvider = String(env.EMAIL_PROVIDER || "").trim().toLowerCase();
+  if (emailProvider !== "resend") problems.push("EMAIL_PROVIDER must be set to 'resend' in production so email is delivered over HTTPS.");
+  const resendApiKey = String(env.RESEND_API_KEY || "").trim();
+  if (!resendApiKey || /(replace.?with|your.?api.?key|example|placeholder|change.?me)/i.test(resendApiKey)) {
+    problems.push("RESEND_API_KEY must contain the real server-side Resend API key.");
+  }
+  const emailFrom = String(env.EMAIL_FROM || "").trim();
+  const senderMatch = emailFrom.match(/<\s*([^<>]+)\s*>/);
+  const senderAddress = (senderMatch ? senderMatch[1] : emailFrom).trim();
+  if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(senderAddress) || /example\.com|\.example(?:$|\s)|@resend\.dev$/i.test(senderAddress)) {
+    problems.push("EMAIL_FROM must contain a valid sender address on a real domain verified with the transactional email provider.");
+  }
   try {
     const rawAppUrl = String(env.PUBLIC_APP_URL || "").trim();
     const appUrl = new URL(rawAppUrl);
@@ -71,8 +77,6 @@ function validateProductionConfig(env = process.env) {
   } catch {
     problems.push("PUBLIC_APP_URL must be set to the deployed frontend URL in production.");
   }
-  const smtpPort = Number(env.SMTP_PORT || 587);
-  if (!Number.isInteger(smtpPort) || smtpPort < 1 || smtpPort > 65535) problems.push("SMTP_PORT must be a valid TCP port.");
   try {
     parseAllowedOrigins(env);
   } catch (error) {

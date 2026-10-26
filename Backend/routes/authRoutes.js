@@ -122,7 +122,7 @@ router.post("/register", registrationRateLimit, async (req, res) => {
       });
     } catch (mailError) {
       console.error("[verification-email-send-failed]", String(mailError.code || mailError.message || "UNKNOWN"));
-      return res.status(502).json({ success: false, message: "Your account was created, but the verification email could not be sent. Configure email delivery or use Resend verification on the sign-in page." });
+      return res.status(502).json({ success: false, message: "Your account was created, but the verification email could not be sent. Check the transactional email API configuration or use Resend verification on the sign-in page." });
     }
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {
@@ -179,7 +179,7 @@ router.post("/resend-verification", emailActionRateLimit, async (req, res) => {
     if (rows.length && !rows[0].email_verified_at) {
       const token = await createVerificationToken(rows[0].id);
       let deliveryOk = false;
-      let deliveryMode = "smtp";
+      let deliveryMode = "not_sent";
       try {
         const delivery = await sendVerificationEmail({ to: rows[0].email, fullName: rows[0].full_name, token });
         deliveryMode = delivery.mode;

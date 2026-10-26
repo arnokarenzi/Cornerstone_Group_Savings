@@ -22,7 +22,8 @@
     "preflight:phase8": "node scripts/phase8-preflight.js",
     "configure:phase9": "node scripts/configure-phase9.js",
     "preflight:phase9": "node scripts/audit-constitutional-term-references.js && node scripts/phase9-preflight.js",
-    "audit:constitutional-terms": "node scripts/audit-constitutional-term-references.js"
+    "audit:constitutional-terms": "node scripts/audit-constitutional-term-references.js",
+    "email:test": "node scripts/send-test-email.js"
   },
   "keywords": [],
   "author": "",
@@ -34,8 +35,7 @@
     "dotenv": "^18.0.8",
     "express": "^5.3.0",
     "jsonwebtoken": "^9.0.3",
-    "mysql2": "^3.24.6",
-    "nodemailer": "^10.2.1"
+    "mysql2": "^3.24.6"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

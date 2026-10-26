@@ -47,9 +47,8 @@ test("production configuration accepts explicit long secrets, database credentia
     FRONTEND_ORIGINS: "https://app.cornestone.com,https://www.cornestone.com",
     DB_HOST: "db.example", DB_USER: "cornestone_app", DB_NAME: "cornestone_online_db", DB_PASSWORD: "strong-db-password", DB_SSL_ENABLED: "true",
     TRUST_PROXY_HOPS: "1",
-    SMTP_HOST: "smtp.cornestone.com", SMTP_PORT: "587", SMTP_SECURE: "false",
-    SMTP_USER: "smtp-user", SMTP_PASSWORD: "smtp-password",
-    SMTP_FROM: "CORNESTONE <no-reply@cornestone.com>", PUBLIC_APP_URL: "https://app.cornestone.com",
+    EMAIL_PROVIDER: "resend", RESEND_API_KEY: "re_test_api_key",
+    EMAIL_FROM: "CORNESTONE <no-reply@cornestone.com>", PUBLIC_APP_URL: "https://app.cornestone.com",
   });
   assert.deepEqual(problems, []);
   assert.deepEqual(parseAllowedOrigins({ NODE_ENV: "production", FRONTEND_ORIGINS: "https://app.cornestone.com,https://www.cornestone.com" }), [
@@ -64,21 +63,22 @@ test("production configuration requires database TLS", () => {
     FRONTEND_ORIGINS: "https://members.cornestone.rw",
     DB_HOST: "db.cornestone.rw", DB_USER: "cornestone_app", DB_NAME: "cornestone_online_db", DB_PASSWORD: "safe-password",
     TRUST_PROXY_HOPS: "1",
-    SMTP_HOST: "smtp.cornestone.rw", SMTP_USER: "smtp-user", SMTP_PASSWORD: "smtp-password",
-    SMTP_FROM: "CORNESTONE <no-reply@cornestone.rw>", PUBLIC_APP_URL: "https://members.cornestone.rw",
+    EMAIL_PROVIDER: "resend", RESEND_API_KEY: "re_test_api_key",
+    EMAIL_FROM: "CORNESTONE <no-reply@cornestone.rw>", PUBLIC_APP_URL: "https://members.cornestone.rw",
   });
   assert.ok(problems.some((problem) => problem.includes("DB_SSL_ENABLED")));
 });
 
-test("production configuration requires SMTP delivery and an HTTPS frontend URL", () => {
+test("production configuration requires Resend HTTPS delivery and an HTTPS frontend URL", () => {
   const problems = validateProductionConfig({
     NODE_ENV: "production",
     JWT_SECRET: "unique-production-secret-long-enough-for-this-check-2026",
     FRONTEND_ORIGINS: "https://members.cornestone.rw",
     DB_HOST: "db.cornestone.rw", DB_USER: "cornestone_app", DB_NAME: "cornestone_online_db", DB_PASSWORD: "safe-password", TRUST_PROXY_HOPS: "1",
   });
-  assert.ok(problems.some((problem) => problem.includes("SMTP_HOST")));
-  assert.ok(problems.some((problem) => problem.includes("SMTP_FROM")));
+  assert.ok(problems.some((problem) => problem.includes("EMAIL_PROVIDER")));
+  assert.ok(problems.some((problem) => problem.includes("RESEND_API_KEY")));
+  assert.ok(problems.some((problem) => problem.includes("EMAIL_FROM")));
   assert.ok(problems.some((problem) => problem.includes("PUBLIC_APP_URL")));
 });
 
@@ -164,8 +164,8 @@ test("production config rejects root database access and an unspecified proxy to
     JWT_SECRET: "unique-production-secret-long-enough-for-this-check-2026",
     FRONTEND_ORIGINS: "https://members.cornestone.rw",
     DB_HOST: "db.cornestone.rw", DB_USER: "root", DB_NAME: "cornestone_online_db", DB_PASSWORD: "strong-password",
-    SMTP_HOST: "smtp.cornestone.rw", SMTP_USER: "smtp-user", SMTP_PASSWORD: "smtp-password",
-    SMTP_FROM: "CORNESTONE <no-reply@cornestone.rw>", PUBLIC_APP_URL: "https://members.cornestone.rw",
+    EMAIL_PROVIDER: "resend", RESEND_API_KEY: "re_test_api_key",
+    EMAIL_FROM: "CORNESTONE <no-reply@cornestone.rw>", PUBLIC_APP_URL: "https://members.cornestone.rw",
   });
   assert.ok(problems.some((problem) => problem.includes("not root")));
   assert.ok(problems.some((problem) => problem.includes("TRUST_PROXY_HOPS")));
