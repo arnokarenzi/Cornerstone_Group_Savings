@@ -47,7 +47,9 @@ CREATE TABLE IF NOT EXISTS member_payment_submissions (
   CONSTRAINT fk_member_payment_transaction FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE SET NULL,
   CONSTRAINT fk_member_payment_receipt FOREIGN KEY (receipt_id) REFERENCES financial_receipts(id) ON DELETE SET NULL,
   CONSTRAINT chk_member_payment_amount CHECK (amount > 0 AND shares_count >= 0),
-  CONSTRAINT chk_member_payment_purpose CHECK ((purpose = 'SHARE_PURCHASE' AND shares_count > 0 AND share_value_at_submission > 0 AND loan_id IS NULL AND fine_assessment_id IS NULL AND meeting_id IS NOT NULL) OR (purpose = 'LOAN_REPAYMENT' AND shares_count = 0 AND loan_id IS NOT NULL AND fine_assessment_id IS NULL) OR (purpose = 'FINE_PAYMENT' AND shares_count = 0 AND loan_id IS NULL AND fine_assessment_id IS NOT NULL AND meeting_id IS NULL))
+  -- MySQL forbids referencing meeting_id in this CHECK because its foreign key uses ON DELETE SET NULL.
+  -- MemberPaymentService validates the virtual meeting association for share purchases; loan repayments and fines use no meeting.
+  CONSTRAINT chk_member_payment_purpose CHECK ((purpose = 'SHARE_PURCHASE' AND shares_count > 0 AND share_value_at_submission > 0 AND loan_id IS NULL AND fine_assessment_id IS NULL) OR (purpose = 'LOAN_REPAYMENT' AND shares_count = 0 AND loan_id IS NOT NULL AND fine_assessment_id IS NULL) OR (purpose = 'FINE_PAYMENT' AND shares_count = 0 AND loan_id IS NULL AND fine_assessment_id IS NOT NULL))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE IF NOT EXISTS loan_applications (
