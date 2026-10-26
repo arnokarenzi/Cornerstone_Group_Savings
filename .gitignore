@@ -1,0 +1,19 @@
+# Environment secrets
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Dependencies and build outputs
+node_modules/
+**/node_modules/
+Frontend/dist/
+Backend/coverage/
+coverage/
+
+# Local database dumps and logs
+*.sql.gz
+*.dump
+*.log

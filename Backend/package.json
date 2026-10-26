@@ -1,0 +1,46 @@
+{
+  "name": "cornestone-online-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node scripts/run-tests.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "check:syntax": "node scripts/check-syntax.js",
+    "provision:company": "node scripts/provision-company.js",
+    "configure:phase2": "node scripts/configure-phase2.js",
+    "db:fresh-install": "node scripts/fresh-install.js",
+    "configure:phase3": "node scripts/configure-phase3.js",
+    "preflight:production": "node scripts/production-preflight.js",
+    "audit:finance": "node scripts/financial-audit.js",
+    "configure:phase6": "node scripts/configure-phase6.js",
+    "preflight:phase6": "node scripts/phase6-preflight.js",
+    "preflight:phase7": "node scripts/phase7-preflight.js",
+    "smoke:staging": "node scripts/staging-smoke.js",
+    "configure:phase8": "node scripts/configure-phase8.js",
+    "preflight:phase8": "node scripts/phase8-preflight.js",
+    "configure:phase9": "node scripts/configure-phase9.js",
+    "preflight:phase9": "node scripts/audit-constitutional-term-references.js && node scripts/phase9-preflight.js",
+    "audit:constitutional-terms": "node scripts/audit-constitutional-term-references.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.24.6",
+    "nodemailer": "^10.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
